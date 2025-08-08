@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎙️ Live Voice Stream</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f7f7f7;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎙️ Live Voice Streaming</h1>
+  <button id="start">Start Broadcasting</button>
+  <p id="status">Listeners will hear your voice in real-time.</p>
+
+  <!-- Include Socket.IO client script -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const startButton = document.getElementById("start");
+    const status = document.getElementById("status");
+
+    let isBroadcasting = false;
+
+    startButton.onclick = async () => {
+      if (isBroadcasting) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        const processor = audioContext.createScriptProcessor(2048, 1, 1);
+
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        processor.onaudioprocess = (e) => {
+          const inputData = e.inputBuffer.getChannelData(0);
+          socket.emit("voice", inputData.buffer);
+        };
+
+        isBroadcasting = true;
+        startButton.disabled = true;
+        startButton.innerText = "Broadcasting...";
+        status.innerText = "You are live. Others can hear you.";
+      } catch (err) {
+        alert("Microphone access denied or error occurred.");
+        console.error(err);
+      }
+    };
+
+    // Listener: play audio from others
+    const speakerAudio = new (window.AudioContext || window.webkitAudioContext)();
+    socket.on("voice", (buffer) => {
+      const floatArray = new Float32Array(buffer);
+      const audioBuffer = speakerAudio.createBuffer(1, floatArray.length, speakerAudio.sampleRate);
+      audioBuffer.getChannelData(0).set(floatArray);
+
+      const source = speakerAudio.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(speakerAudio.destination);
+      source.start();
+    });
+  </script>
+</body>
+</html>
