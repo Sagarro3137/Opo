@@ -2,27 +2,31 @@
 const express = require("express");
 const http = require("http");
 const socketIO = require("socket.io");
-const app = express();
+const path = require("path");
 
+const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
-// Serve static files
-app.use(express.static("public"));
+// Serve static frontend files from /public folder
+app.use(express.static(path.join(__dirname, "public")));
 
 io.on("connection", (socket) => {
-    console.log("User connected");
+    console.log("🔌 New user connected");
 
+    // Receive audio from broadcaster and send to others
     socket.on("voice", (data) => {
         socket.broadcast.emit("voice", data);
     });
 
     socket.on("disconnect", () => {
-        console.log("User disconnected");
+        console.log("❌ User disconnected");
     });
 });
 
-const PORT = 3000;
+// Choose PORT from environment or default to 3000
+const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
