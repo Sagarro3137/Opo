@@ -24,8 +24,8 @@ io.on("connection", (socket) => {
     });
 });
 
-// Choose PORT from environment or default to 3000
-const PORT = process.env.PORT || 3000;
+// Choose PORT from environment or default to 10000
+const PORT = process.env.PORT || 10000;
 
 server.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
