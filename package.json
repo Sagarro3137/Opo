@@ -1,3 +1,24 @@
-"scripts": {
-  "start": "node server.js"
+{
+  "name": "voice-stream",
+  "version": "1.0.0",
+  "description": "Live voice streaming website using Node.js, Express, and Socket.IO",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "voice",
+    "live",
+    "stream",
+    "socket.io",
+    "express",
+    "webRTC",
+    "audio"
+  ],
+  "author": "YourName",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
 }
